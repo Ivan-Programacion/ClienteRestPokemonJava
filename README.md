@@ -4,6 +4,6 @@
 - 3 Johto
 - 4 Hoenn
 - 6 Sinnoh
-pokemon_entries[i].entry_number = numeroPokedex
-pokemon_entries[numeroPokedex - 1].pokemon_species.name = nombre
+- pokemon_entries[i].entry_number = numeroPokedex
+- pokemon_entries[numeroPokedex - 1].pokemon_species.name = nombre
 ## https://pokeapi.co/api/v2/pokemon/[nombre] -> datos del pokemon
