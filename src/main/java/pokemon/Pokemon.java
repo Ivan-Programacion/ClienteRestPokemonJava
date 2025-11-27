@@ -54,4 +54,15 @@ public class Pokemon implements Serializable {
 		return "Pokemon [name=" + name + ", height=" + height + ", weight=" + weight + ", types=" + types + "]";
 	}
 
+	public String tipos() {
+		String resultado = "";
+		for (int i = 0; i < types.size(); i++) {
+			if(types.size() == 1 || i == 0)
+				resultado = types.get(i).getType().getName();
+			else
+				resultado += " " + types.get(i).getType().getName();
+		}
+		return resultado;
+	}
+
 }
