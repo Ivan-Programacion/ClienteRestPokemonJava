@@ -6,12 +6,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /* 
@@ -58,21 +58,35 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 
 public class Main {
-	
+
 	static HashMap<String, Object> cache = new HashMap<>(); // caché de los end points
-	static String api = "https://pokeapi.co/api/v2";
+	static String api = "https://pokeapi.co/api/v2"; // Api general
+	// Jackson
 	static ObjectMapper mapper = new ObjectMapper();
 	static HttpClient cliente = HttpClient.newHttpClient();
 	static HttpRequest peticion;
 	static HttpResponse<String> respuesta;
+	// Scanner
 	static Scanner sc = new Scanner(System.in);
+	// Datos necesarios
 	static String json;
 	static String url;
+	static final int NUM_POKEMON_ADIVINAR = 10;
+	// listaPokemon -> guardaremos los 10 pokemon aleatorios a adivinar
+	static ArrayList<Pokemon> listaPokemon = new ArrayList<>();
 
 	public static void main(String[] args) {
 
 		try {
-			apiRest();
+			for (int i = 0; i < NUM_POKEMON_ADIVINAR; i++) {
+				Pokemon pokemon = pokemon();
+				// Si el pokemon == null => no lo añadas a la lista
+				if (pokemon.getName() != null)
+					listaPokemon.add(pokemon);
+				else
+					i -= 1;
+			}
+			juego(); // AQUÍ REALIZA EL JUEGO MARIO!!!!
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -80,11 +94,22 @@ public class Main {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
+		sc.close();
+		cliente.close();
 	}
 
-	private static void apiRest()
-			throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+	// AQUI EL JUEGO
+	private static void juego() {
+		int contador = 1;
+		for (Pokemon pokemon : listaPokemon) {
+			System.out.println("num " + contador++);
+			System.out.println("- Pokemon: " + pokemon.getName() + "\n- Tipo: " + pokemon.tipos());
+			System.out.println("-----------------------------");
+		}
+
+	}
+
+	private static Pokemon pokemon() throws IOException, InterruptedException {
 		// ----------- APIPOKEMON -----------
 		ApiPokemon miApi = new ApiPokemon();
 		url = api;
@@ -129,17 +154,24 @@ public class Main {
 		Pokemon miPokemon = new Pokemon();
 		url = miApi.getPokemon() + nombrePokemon; // ENDPOINT PARA DATOS DEL POKEMON -->
 													// https://pokeapi.co/api/v2/pokemon/[nombrePokemon]
-		if (!cache.containsKey(url)) {
-			peticion = HttpRequest.newBuilder().uri(URI.create(url)).build();
-			respuesta = cliente.send(peticion, BodyHandlers.ofString());
-			json = respuesta.body();
-			miPokemon = mapper.readValue(json, Pokemon.class);
-			cache.put(url, miPokedex);
-		} else
-			miPokemon = (Pokemon) cache.get(url);
-
-		// PRUEBA
-		System.out.println(miPokemon.toString());
+		try {
+			if (!cache.containsKey(url)) {
+				peticion = HttpRequest.newBuilder().uri(URI.create(url)).build();
+				respuesta = cliente.send(peticion, BodyHandlers.ofString());
+				json = respuesta.body();
+				miPokemon = mapper.readValue(json, Pokemon.class);
+				cache.put(url, miPokedex);
+			} else
+				miPokemon = (Pokemon) cache.get(url);
+			// Tratamos excepcion JsonParseException para que, en caso de que la estrcutura
+			// del json que nos de del pokemon no sea correcta, no rompa el programa
+			// igualmente
+		} catch (JsonParseException e) {
+			System.err.println("ERROR");
+//			e.printStackTrace();
+		}
+		System.out.println(miPokemon);
+		return miPokemon;
 	}
 
 }
