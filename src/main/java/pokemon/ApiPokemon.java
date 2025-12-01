@@ -9,6 +9,7 @@ public class ApiPokemon implements Serializable {
 
 	private String pokedex; // url pokedex
 	private String pokemon; // url pokemon
+	private String type; // url type
 
 	public String getPokedex() {
 		return pokedex;
@@ -24,6 +25,14 @@ public class ApiPokemon implements Serializable {
 
 	public void setPokemon(String pokemon) {
 		this.pokemon = pokemon;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	@Override
