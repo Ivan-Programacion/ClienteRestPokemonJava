@@ -1,5 +1,6 @@
 package pokemon;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -73,33 +74,92 @@ public class Main {
 	static String url;
 	static final int NUM_POKEMON_ADIVINAR = 10;
 	// listaPokemon -> guardaremos los 10 pokemon aleatorios a adivinar
-	static ArrayList<Pokemon> listaPokemon = new ArrayList<>();
+	static ArrayList<Pokemon> listaPokemon;
 	// listaTipos -> guardaremos todos los tipos sacados de la API
 	static ArrayList<String> listaTipos = new ArrayList<>();
+	// listaUsuarios --> Guardaremos la lista de usuarios cargados desde un fichero
+	// JSON
+	static ListaUsuario listaUsuarios = null;
+	// miUsuario --> usuario actual jugando
+	static Usuario miUsuario;
+	// fichero --> Fichero JSON donde guardaremos los datos del usuario (name,
+	// score)
+	static File fichero;
 
 	public static void main(String[] args) {
+		// Cargamos los usuarios en la listaUsuarios
+		cargarUsuarios();
+		int opcion = -1;
+		while (opcion != 0) {
+			opcion = -1;
+			try {
+				// Cogemos los 10 pokemon aleatorios y los guardamos en la listaPokemon
+				listaPokemon = new ArrayList<>();
+				for (int i = 0; i < NUM_POKEMON_ADIVINAR; i++) {
+					Pokemon pokemon = pokemon();
+					// Si el pokemon == null => no lo añadas a la lista
+					if (pokemon.getName() != null)
+						listaPokemon.add(pokemon);
+					else
+						i -= 1;
+				}
+				// Cargamos todos los tipos en la listaTipos
+				cargarTipos();
+				// Arrancamos el juego
+				adivinarTipos();
+				while (opcion != 1 && opcion != 0) {
+					try {
+						System.out.println("¿Quieres volver a jugar? (1 -> Sí | 0 -> No)");
+						opcion = Integer.parseInt(sc.nextLine());
+						if (opcion < 0 || opcion > 1)
+							System.out.println("Escribe un número correcto");
+					} catch (NumberFormatException n) {
+						System.out.println("Escribe un número");
+					}
 
-		try {
-
-			for (int i = 0; i < NUM_POKEMON_ADIVINAR; i++) {
-				Pokemon pokemon = pokemon();
-				// Si el pokemon == null => no lo añadas a la lista
-				if (pokemon.getName() != null)
-					listaPokemon.add(pokemon);
-				else
-					i -= 1;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				System.exit(-1);
 			}
-			cargarTipos(); // Primero cargamos todos los tipos
-			adivinarTipos(); // Arrancamos el juego
+		}
+		System.out.println("¡Gracias por jugar " + miUsuario.getUser() + "! ¡Hasta la próxima!");
+		sc.close();
+		cliente.close();
+	}
+
+	private static void cargarUsuarios() {
+		// Creamos el fichero o lo cargamos si ya existiera
+		String usuarios = "usuarios.json";
+		fichero = new File(usuarios);
+		try {
+			if (!fichero.exists()) {
+				fichero.createNewFile();
+				listaUsuarios = new ListaUsuario(new ArrayList<>());
+			} else {
+				listaUsuarios = mapper.readValue(fichero, ListaUsuario.class);
+			}
+			// Pedimos al usuario su nombre
+			System.out.println("Escribe tu nombre de usuario:");
+			String nombre = sc.nextLine();
+			miUsuario = null;
+			for (Usuario usuario : listaUsuarios.getListaUsuarios()) {
+				// Si existe, cargamos sus datos
+				if (usuario.getUser().equals(nombre))
+					miUsuario = usuario;
+			}
+			// Si no existe, añadimos un nuevo registro al JSON
+			if (miUsuario == null) {
+				miUsuario = new Usuario(nombre, 0);
+				listaUsuarios.getListaUsuarios().add(miUsuario);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			System.exit(-1);
 		}
-		sc.close();
-		cliente.close();
 	}
 
 	private static void cargarTipos() throws IOException, InterruptedException {
@@ -117,10 +177,13 @@ public class Main {
 		} else {
 			miApiType = (ApiType) cache.get(url);
 		}
-		for (TypeAuxiliar resultado : miApiType.getResults()) {
-			// No añadimos los tipos: unknown y stellar porque no pertenecen a ningún pokemon
-			if (!resultado.getName().equals("unknown") && !resultado.getName().equals("stellar"))
-				listaTipos.add(resultado.getName());
+		if(listaTipos.isEmpty()) {
+			for (TypeAuxiliar resultado : miApiType.getResults()) {
+				// No añadimos los tipos: unknown y stellar porque no pertenecen a ningún
+				// pokemon
+				if (!resultado.getName().equals("unknown") && !resultado.getName().equals("stellar"))
+					listaTipos.add(resultado.getName());
+			}
 		}
 	}
 
@@ -131,13 +194,14 @@ public class Main {
 		Random random = new Random();
 
 		// Bienvenida
-		System.out.println("¡Bienvenido al juego de adivinar los tipos de los Pokémon!");
+		System.out.println("¡Bienvenido, " + miUsuario.getUser() + ", al juego de adivinar los tipos de los Pokémon!");
 		System.out.println("Constará de 10 preguntas y cada acierto serán 10 puntos. ¡Buena suerte!");
-
+		System.out.println("Tu mayor score registrado es: " + miUsuario.getScore());
+		System.out.println();
 		for (Pokemon pokemon : listaPokemon) {
 			System.out.println("Pregunta " + contador++ + " | -> Score: " + puntos);
-			System.out.println("- Pokemon: " + pokemon.getName() + "\n- Tipo: " + pokemon.tipos());
-			System.out.println("---------------------------");
+			System.out.println("- Pokemon: " + pokemon.getName()); //+ "\n- Tipo: " + pokemon.tipos());
+			System.out.println();
 
 			// Tipos correctos (puede tener 1 o 2 tipos)
 			ArrayList<String> tiposCorrectos = new ArrayList<>();
@@ -200,13 +264,13 @@ public class Main {
 					// Comprobamos que introduce un número adecuado
 					if (opcionFinal < 1 || opcionFinal > 4) {
 						System.out.println("Escribe un número correcto");
-					}else {
+					} else {
 						String opcionElegida = listaOpciones.get(opcionFinal - 1);
 						// Si la respuesta coincide con la opción correcta habrá acertado
 						if (opcionElegida.equals(opcionCorrecta)) {
 							System.out.println("¡Correcto! +10 Puntos");
 							puntos += 10;
-							
+
 						} else {
 							System.out.println("Incorrecto. El tipo correcto era: " + opcionCorrecta);
 						}
@@ -216,11 +280,30 @@ public class Main {
 				}
 			}
 
-			System.out.println("---------------------------");
+			System.out.println(
+					"----------------------------------------------------------------------------------------------------------------------");
 		}
 
 		// RESULTADO
-		System.out.println("Fin del juego. Score total: " + puntos + " puntos.");
+		System.out.println("Fin del juego. Score total conseguido: " + puntos + " puntos.");
+		if (puntos > miUsuario.getScore()) {
+			miUsuario.setScore(puntos);
+			for (Usuario usuario : listaUsuarios.getListaUsuarios()) {
+				if (usuario.getUser().equals(miUsuario.getUser())) {
+					usuario.setScore(puntos);
+				}
+			}
+		}
+		System.out.println("Tu mayor score registrado es: " + miUsuario.getScore());
+
+		// AHORA LO MODIFICAMOS
+		try {
+			mapper.writeValue(fichero, listaUsuarios);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		System.out.println();
 
 	}
 
