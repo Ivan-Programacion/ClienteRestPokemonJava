@@ -81,8 +81,6 @@ public class MainMario {
 
 		try {
 
-			cargarTipos(); // Primero cargamos todos los tipos
-
 			for (int i = 0; i < NUM_POKEMON_ADIVINAR; i++) {
 				Pokemon pokemon = pokemon();
 				// Si el pokemon == null => no lo añadas a la lista
@@ -91,7 +89,8 @@ public class MainMario {
 				else
 					i -= 1;
 			}
-			adivinarTipos(); // AQUÍ REALIZA EL JUEGO MARIO!!!!
+			cargarTipos(); // Primero cargamos todos los tipos
+			adivinarTipos(); // Juego para adivinar
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -106,18 +105,21 @@ public class MainMario {
 	private static void cargarTipos() throws IOException, InterruptedException {
 		// ----------- APITYPE -----------
 		ApiType miApiType = new ApiType();
-		url = api + "/type";
+		ApiPokemon miApiPokemon = (ApiPokemon) cache.get(api);
+		url = miApiPokemon.getType() ;
 		if (!cache.containsKey(url)) {
 			peticion = HttpRequest.newBuilder().uri(URI.create(url)).build();
 			respuesta = cliente.send(peticion, BodyHandlers.ofString());
 			json = respuesta.body();
 			miApiType = mapper.readValue(json, ApiType.class);
-			for (TypeAuxiliar resultado : miApiType.getResults()) {
-				listaTipos.add(resultado.getName());
-			}
-			cache.put(url, listaTipos);
+			cache.put(url, miApiType);
+
 		} else {
-			listaTipos = (ArrayList<String>) cache.get(url);
+			miApiType = (ApiType) cache.get(url);
+		}
+		for (TypeAuxiliar resultado : miApiType.getResults()) {
+			if (!resultado.getName().equals("unknown") && !resultado.getName().equals("stellar"))
+				listaTipos.add(resultado.getName());
 		}
 	}
 
@@ -173,7 +175,8 @@ public class MainMario {
 				}
 
 				// Evitamos duplicados y que coincida con la opción correcta
-				if (!listaOpciones.contains(candidato) && (!(listaOpciones.contains("unkown")) || !(listaOpciones.contains("stellar")))) {
+				if (!listaOpciones.contains(candidato)
+						&& (!(listaOpciones.contains("unkown")) || !(listaOpciones.contains("stellar")))) {
 					listaOpciones.add(candidato);
 				}
 			}
