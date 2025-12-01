@@ -90,7 +90,7 @@ public class Main {
 					i -= 1;
 			}
 			cargarTipos(); // Primero cargamos todos los tipos
-			adivinarTipos(); // Juego para adivinar
+			adivinarTipos(); // Arrancamos el juego
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -106,7 +106,7 @@ public class Main {
 		// ----------- APITYPE -----------
 		ApiType miApiType = new ApiType();
 		ApiPokemon miApiPokemon = (ApiPokemon) cache.get(api);
-		url = miApiPokemon.getType() ;
+		url = miApiPokemon.getType();
 		if (!cache.containsKey(url)) {
 			peticion = HttpRequest.newBuilder().uri(URI.create(url)).build();
 			respuesta = cliente.send(peticion, BodyHandlers.ofString());
@@ -118,12 +118,13 @@ public class Main {
 			miApiType = (ApiType) cache.get(url);
 		}
 		for (TypeAuxiliar resultado : miApiType.getResults()) {
+			// No añadimos los tipos: unknown y stellar porque no pertenecen a ningún pokemon
 			if (!resultado.getName().equals("unknown") && !resultado.getName().equals("stellar"))
 				listaTipos.add(resultado.getName());
 		}
 	}
 
-	// AQUI EL JUEGO
+	// JUEGO
 	private static void adivinarTipos() {
 		int puntos = 0;
 		int contador = 1;
@@ -134,9 +135,9 @@ public class Main {
 		System.out.println("Constará de 10 preguntas y cada acierto serán 10 puntos. ¡Buena suerte!");
 
 		for (Pokemon pokemon : listaPokemon) {
-			System.out.println("Pregunta " + contador++);
+			System.out.println("Pregunta " + contador++ + " | -> Score: " + puntos);
 			System.out.println("- Pokemon: " + pokemon.getName() + "\n- Tipo: " + pokemon.tipos());
-			System.out.println("-----------------------------");
+			System.out.println("---------------------------");
 
 			// Tipos correctos (puede tener 1 o 2 tipos)
 			ArrayList<String> tiposCorrectos = new ArrayList<>();
@@ -189,23 +190,37 @@ public class Main {
 				System.out.println((i + 1) + ". " + listaOpciones.get(i));
 			}
 
-			System.out.print("Elige una opción (1-4): ");
-			int respuesta = sc.nextInt();
+			int opcionFinal = 0;
+			while (opcionFinal < 1 || opcionFinal > 4) {
+				System.out.println("Elige una opción (1-4): ");
+				String opcion = sc.nextLine();
+				try {
+					opcionFinal = Integer.parseInt(opcion);
 
-			String opcionElegida = listaOpciones.get(respuesta - 1);
-
-			// Si la respuesta coincide con los tiposCorrectos habrá acertado
-			if (opcionElegida.equals(opcionCorrecta)) {
-				System.out.println("¡Correcto! +10 Puntos");
-				puntos += 10;
-			} else {
-				System.out.println("Incorrecto. El tipo correcto era: " + opcionCorrecta);
+					// Comprobamos que introduce un número adecuado
+					if (opcionFinal < 1 || opcionFinal > 4) {
+						System.out.println("Escribe un número correcto");
+					}else {
+						String opcionElegida = listaOpciones.get(opcionFinal - 1);
+						// Si la respuesta coincide con la opción correcta habrá acertado
+						if (opcionElegida.equals(opcionCorrecta)) {
+							System.out.println("¡Correcto! +10 Puntos");
+							puntos += 10;
+							
+						} else {
+							System.out.println("Incorrecto. El tipo correcto era: " + opcionCorrecta);
+						}
+					}
+				} catch (NumberFormatException e) {
+					System.out.println("Escribe un número");
+				}
 			}
-			System.out.println("-----------------------------");
+
+			System.out.println("---------------------------");
 		}
 
 		// RESULTADO
-		System.out.println("Fin del juego. Puntuación obtenida: " + puntos + " puntos.");
+		System.out.println("Fin del juego. Score total: " + puntos + " puntos.");
 
 	}
 
@@ -263,14 +278,13 @@ public class Main {
 				cache.put(url, miPokedex);
 			} else
 				miPokemon = (Pokemon) cache.get(url);
-			// Tratamos excepcion JsonParseException para que, en caso de que la estrcutura
+			// Tratamos excepcion JsonParseException para que, en caso de que la estructura
 			// del json que nos de del pokemon no sea correcta, no rompa el programa
 			// igualmente
 		} catch (JsonParseException e) {
-			System.err.println("ERROR");
+//			System.err.println("ERROR");
 //			e.printStackTrace();
 		}
-		System.out.println(miPokemon);
 		return miPokemon;
 	}
 
