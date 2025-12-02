@@ -1,9 +1,9 @@
 package pokemon;
 
 public class Usuario {
-
-	private String user;
-	private int score;
+	
+	private String user; // nombre usuario
+	private int score; // puntación máxima conseguida
 
 	public Usuario() {
 

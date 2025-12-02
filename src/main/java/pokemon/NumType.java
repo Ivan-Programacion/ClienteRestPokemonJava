@@ -9,7 +9,7 @@ public class NumType implements Serializable {
 
 	// Atributo
 
-	private Type type;
+	private Type type; // Tipo del pokemon
 
 	// Getter y Setter
 

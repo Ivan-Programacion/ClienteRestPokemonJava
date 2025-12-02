@@ -10,10 +10,8 @@ public class Pokemon implements Serializable {
 
 	// Atributos
 
-	private String name;
-	private int height;
-	private int weight;
-	private List<NumType> types;
+	private String name; // Nombre pokemon
+	private List<NumType> types; // tipos del pokemon (puede ser 1 tipo (size = 1) o 2 tipos (size = 2)
 
 	// Getter y Setters
 
@@ -23,22 +21,6 @@ public class Pokemon implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
-	public int getWeight() {
-		return weight;
-	}
-
-	public void setWeight(int weight) {
-		this.weight = weight;
 	}
 
 	public List<NumType> getTypes() {
@@ -51,13 +33,13 @@ public class Pokemon implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Pokemon [name=" + name + ", height=" + height + ", weight=" + weight + ", types=" + types + "]";
+		return "Pokemon [name=" + name + ", height=" + ", types=" + types + "]";
 	}
 
 	public String tipos() {
 		String resultado = "";
 		for (int i = 0; i < types.size(); i++) {
-			if(types.size() == 1 || i == 0)
+			if (types.size() == 1 || i == 0)
 				resultado = types.get(i).getType().getName();
 			else
 				resultado += " " + types.get(i).getType().getName();

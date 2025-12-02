@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * APIPOKEMON:
  * pokedex string --> url Para pokedex: https://pokeapi.co/api/v2/pokedex/
  * pokemon string --> url Para pokemon: https://pokeapi.co/api/v2/pokemon/
+ * type string --> url Para tipos: https://pokeapi.co/api/v2/type/
  * 
  * APIPOKEDEX - https://pokeapi.co/api/v2/pokedex/
  * results list PokedexAuxiliar --> get(0) --> Pokedex nacional con TODOS LOS POKEMON
@@ -47,8 +48,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * POKEMON: https://pokeapi.co/api/v2/pokemon/[name]
  * name string
- * height int
- * weight int
  * types list NumType
  * 
  * NUMTYPE:
@@ -56,6 +55,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * TYPE:
  * name string
+ * 
+ * LISTA DE TIPOS ---> https://pokeapi.co/api/v2/type/
+ * 
+ * TYPEAUXILIAR
+ * name string
+ * url string
  */
 
 public class Main {
@@ -177,10 +182,10 @@ public class Main {
 		} else {
 			miApiType = (ApiType) cache.get(url);
 		}
-		if(listaTipos.isEmpty()) {
+		if (listaTipos.isEmpty()) {
 			for (TypeAuxiliar resultado : miApiType.getResults()) {
 				// No añadimos los tipos: unknown y stellar porque no pertenecen a ningún
-				// pokemon
+				// pokemon (no existen o son error de la api)
 				if (!resultado.getName().equals("unknown") && !resultado.getName().equals("stellar"))
 					listaTipos.add(resultado.getName());
 			}
@@ -200,7 +205,7 @@ public class Main {
 		System.out.println();
 		for (Pokemon pokemon : listaPokemon) {
 			System.out.println("Pregunta " + contador++ + " | -> Score: " + puntos);
-			System.out.println("- Pokemon: " + pokemon.getName()); //+ "\n- Tipo: " + pokemon.tipos());
+			System.out.println("- Pokemon: " + pokemon.getName()); // + "\n- Tipo: " + pokemon.tipos());
 			System.out.println();
 
 			// Tipos correctos (puede tener 1 o 2 tipos)
@@ -240,8 +245,8 @@ public class Main {
 				}
 
 				// Evitamos duplicados y que coincida con la opción correcta
-				if (!listaOpciones.contains(candidato)){						
-					listaOpciones.add(candidato); // MODIFICADO
+				if (!listaOpciones.contains(candidato)) {
+					listaOpciones.add(candidato);
 				}
 			}
 
@@ -252,7 +257,7 @@ public class Main {
 			for (int i = 0; i < listaOpciones.size(); i++) {
 				System.out.println((i + 1) + ". " + listaOpciones.get(i));
 			}
-
+			// Elección de opción
 			int opcionFinal = 0;
 			while (opcionFinal < 1 || opcionFinal > 4) {
 				System.out.println("Elige una opción (1-4): ");
@@ -274,6 +279,7 @@ public class Main {
 							System.out.println("Incorrecto. El tipo correcto era: " + opcionCorrecta);
 						}
 					}
+					// Captamos la excepción en caso de que ponga una opción que no sea numérica
 				} catch (NumberFormatException e) {
 					System.out.println("Escribe un número");
 				}
@@ -294,8 +300,8 @@ public class Main {
 			}
 		}
 		System.out.println("Tu mayor score registrado es: " + miUsuario.getScore());
-
-		// AHORA LO MODIFICAMOS
+		// Actualizamos la puntuación del usuario en caso de que haya superado su
+		// anterior score
 		try {
 			mapper.writeValue(fichero, listaUsuarios);
 		} catch (IOException e) {

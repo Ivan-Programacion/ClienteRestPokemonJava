@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Pokedex implements Serializable {
 
-	private String name;
-	private ArrayList<PokemonAuxiliar> pokemon_entries;
+	private String name; // nombre pokedex
+	private ArrayList<PokemonAuxiliar> pokemon_entries; // datos del pokemon
 
 	public String getName() {
 		return name;

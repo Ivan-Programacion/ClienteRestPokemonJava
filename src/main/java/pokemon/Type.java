@@ -9,7 +9,7 @@ public class Type implements Serializable {
 
 	// Atributo
 
-	private String name;
+	private String name; // nombre del tipo
 
 	// Getter y Setter
 
