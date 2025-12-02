@@ -7,6 +7,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -123,6 +124,10 @@ public class Main {
 					}
 
 				}
+				// Excepción de fallo de conexión
+			} catch (ConnectException x) {
+				System.out.println("No se ha podido conectar al juego. Intentalo más tarde");
+				System.exit(-1);
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(-1);
@@ -182,6 +187,7 @@ public class Main {
 		} else {
 			miApiType = (ApiType) cache.get(url);
 		}
+		// Si no estuviera vacía, utilizamos la de la caché.
 		if (listaTipos.isEmpty()) {
 			for (TypeAuxiliar resultado : miApiType.getResults()) {
 				// No añadimos los tipos: unknown y stellar porque no pertenecen a ningún
