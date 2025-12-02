@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiType implements Serializable {
 
-	private ArrayList<TypeAuxiliar> results;
+	private ArrayList<TypeAuxiliar> results; // Todos los tipos exisitentes en el mundo de Pokemon
 
 	public ArrayList<TypeAuxiliar> getResults() {
 		return results;

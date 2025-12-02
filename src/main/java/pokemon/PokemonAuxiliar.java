@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PokemonAuxiliar implements Serializable {
 
-	private Integer entry_number; // Num pokedex del pokemon
-	private PokemonSpecies pokemon_species;
+	private Integer entry_number; // ID pokedex del pokemon
+	private PokemonSpecies pokemon_species; // Datos del pokemon
 
 	public Integer getEntry_number() {
 		return entry_number;

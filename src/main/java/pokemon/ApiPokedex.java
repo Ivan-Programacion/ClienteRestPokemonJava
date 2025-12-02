@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiPokedex implements Serializable {
 
-	private ArrayList<PokedexAuxiliar> results;
+	private ArrayList<PokedexAuxiliar> results; // resultado de todas las pokedex existentes
 
 	public ArrayList<PokedexAuxiliar> getResults() {
 		return results;

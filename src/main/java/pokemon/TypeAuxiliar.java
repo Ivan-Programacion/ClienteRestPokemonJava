@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TypeAuxiliar implements Serializable {
 
-	private String name;
-	private String url;
+	private String name; // nombre del tipo
+	private String url; // más datos sobre el tipo
 
 	public String getName() {
 		return name;
