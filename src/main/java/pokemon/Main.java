@@ -240,9 +240,8 @@ public class Main {
 				}
 
 				// Evitamos duplicados y que coincida con la opción correcta
-				if (!listaOpciones.contains(candidato)
-						&& (!(listaOpciones.contains("unkown")) || !(listaOpciones.contains("stellar")))) {
-					listaOpciones.add(candidato);
+				if (!listaOpciones.contains(candidato)){						
+					listaOpciones.add(candidato); // MODIFICADO
 				}
 			}
 
